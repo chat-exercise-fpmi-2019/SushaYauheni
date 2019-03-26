@@ -2,7 +2,7 @@
 #### Underlying protocol
 - TCP
 #### Usage of existing protocols
-- XMPP-based
+- No usage, simple protocol
 #### Message delimiting for simple protocols
 - Length-prefixed
 #### Valid username options
