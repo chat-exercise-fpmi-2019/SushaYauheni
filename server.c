@@ -1,87 +1,62 @@
-#include <netdb.h> 
-#include <netinet/in.h> 
-#include <stdlib.h> 
 #include <stdio.h>
-#include <string.h> 
-#include <sys/socket.h> 
-#include <sys/types.h> 
-#define MAX 80 
-#define PORT 8080 
-#define SA struct sockaddr 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
-void str_echo(int);
-void ms(FILE * , int);
+int main()
+{
+    int MasterSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    struct sockaddr_in SockAddr;
+    SockAddr.sin_family = AF_INET;
+    SockAddr.sin_port = htons(1337);
+    SockAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    bind(MasterSocket, (struct sockaddr *)(&SockAddr), sizeof(SockAddr));
 
-int main(int argc, char * argv[]) {
-    int sock, new_conn;
-    struct sockaddr_in server, client;
-    int len;
+    listen(MasterSocket, SOMAXCONN);
 
-    if (argc != 2) {
-        perror("Enter a Port Number!!\n");
-        exit(EXIT_FAILURE);
-    }
+    printf("Waiting 4 a client...\n");
+    int ActiveSocket;
+    fd_set socketsSet, recievedSet;
+    int max = MasterSocket;
 
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-        printf("Fail to create socket!!");
-        exit(EXIT_FAILURE);
-    }
+    FD_ZERO(&socketsSet);
+    FD_ZERO(&recievedSet);
+    FD_SET(MasterSocket, &socketsSet);
 
-    bzero( & server, sizeof(server));
-    bzero( & client, sizeof(client));
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = htonl(INADDR_ANY);
-    server.sin_port = htons(atoi(argv[1]));
+    while (1)
+    {
+        recievedSet = socketsSet;
 
-    if (bind(sock, (struct sockaddr * ) & server, sizeof(server))) {
-        perror("Binding Failed");
-        close(sock);
-        exit(EXIT_FAILURE);
-    }
+        select(max + 1, &recievedSet, NULL, NULL, NULL);
 
-    listen(sock, 5);
+        for (ActiveSocket = 0; ActiveSocket <= max; ActiveSocket++)
+        {
+            if (FD_ISSET(ActiveSocket, &recievedSet))
+            {
+                if (ActiveSocket != MasterSocket)
+                {
+                    char Buffer[100];
+                    size_t msg_size = recv(ActiveSocket, Buffer, 100, 0);
+                    Buffer[msg_size] = 0;
+                    send(ActiveSocket, Buffer, msg_size, 0);
 
-    while (1) {
-        len = sizeof(client);
-        new_conn = accept(sock, (struct sockaddr * ) & client, & len);
-
-        if (new_conn == -1) {
-            perror("Acceptance Failed");
-            close(sock);
-            exit(EXIT_FAILURE);
+                    printf("Client #%d send msg: %s\n", ActiveSocket, Buffer);
+                }
+                else
+                {
+                    ActiveSocket = accept(MasterSocket, 0, 0);
+                    FD_SET(ActiveSocket, &socketsSet);
+                    if (ActiveSocket > max)
+                        max = ActiveSocket;
+                    printf("Client #%d connected!\n", ActiveSocket);
+                }
+            }
         }
 
-        str_echo(new_conn);
-        close(new_conn);
+
     }
+
+    return 0;
 }
 
-void str_echo(int sockfd) {
-    int data_len, i;
-    char buffers[1024];
 
-    while (1) {
-        bzero(buffers, 1024);
-        data_len = recv(sockfd, buffers, 1024, 0);
-        if (data_len > 0) {
-            if ((i = strcmp(buffers, "bye")) == 0) {
-                printf("\nTerminating");
-                return;
-            } else {
-                printf("\n  Message Received from Client is: %s", buffers);
-                printf("\nEnter the Message to be sent to the client\n");
-                ms(stdin, sockfd);
-            }
-        } else {}
-    }
-}
-
-void ms(FILE * fp, int sockfd) {
-    char buf[1024];
-    bzero(buf, 1024);
-
-    while (fgets(buf, 1024, fp) != NULL) {
-        send(sockfd, buf, strlen(buf), 0);
-    }
-}
