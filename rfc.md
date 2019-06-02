@@ -29,7 +29,7 @@ Words (strings without spaces)
 
 ## Messages send from client to server
 
-**Length-prefixed: At the beginning of each message a number of bytes, specifying length of message is added, followed by space.**
+**Length-prefixed: At the beginning of each message a number of bytes, that consists of 4 digits, specifying length of message is added, followed by space.**
 
 ---
 ### User messages
@@ -40,7 +40,7 @@ The USER command is used at the beginning of connection to specify  the username
 
 | Example	| Description |
 | --- | --- |
-| 7 USER G | User with nickname "G" is connecting |
+| 0007 USER G | User with nickname "G" is connecting |
 
 ##### Responses:
 NICKCOLLISION
@@ -56,7 +56,7 @@ Command: "[n] PMSG [msgtarget] [msg]"
 
 | Example	| Description |
 | --- | --- |
-| 13 PMSG G hello | User sending message "hello" to user with nickname "G" |
+| 0013 PMSG G hello | User sending message "hello" to user with nickname "G" |
 
 ##### Responses:
 NOLOGIN
@@ -72,7 +72,7 @@ Command: "[n] BMSG [msg]"
 
 | Example	| Description |
 | --- | --- |
-| 20 BMSG blah blah blah | User sending message "blah blah blah" to all another user |
+| 0020 BMSG blah blah blah | User sending message "blah blah blah" to all another user |
 
 ##### Responses:
 NOLOGIN
