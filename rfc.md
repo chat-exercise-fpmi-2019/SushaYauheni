@@ -21,7 +21,7 @@ Clients and servers MAY do anything, including dropping the connection, after re
 ---
 ### Nick format
 
-Single letters
+Single letters 
 Words (strings without spaces)
 
 ---
