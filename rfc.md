@@ -81,7 +81,12 @@ OK
 
 ---
 ### Quit messages
-Command: \|QUIT\|
+Command: "[n] QUIT"
+[n] - length of the message
+
+| Example	| Description |
+| --- | --- |
+| 0005 QUIT | User quits |
 
 A client session is terminated with a quit message.
 ##### Responses:
@@ -95,6 +100,10 @@ Format: "[n] MESG [from] [msg]"
 - [n] - length of the message
 - [from] - sender nickname
 - [msg] - message text
+
+| Example	| Description |
+| --- | --- |
+| 0014 MESG G hello2 | User sends message hello2 to user G |
 
 ---
 ### Responses
